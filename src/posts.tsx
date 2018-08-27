@@ -1,8 +1,8 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import fetchPosts from "./fetch-posts";
-import { List, Button, Spin } from "antd";
-import { getVisiblePosts, MORE_LOADED } from "./store";
+import { List, Pagination, Spin } from "antd";
+import { getVisiblePosts, PAGE_CHANGED } from "./store";
 
 class Posts extends React.Component<any, any> {
   constructor(props) {
@@ -13,8 +13,8 @@ class Posts extends React.Component<any, any> {
     this.props.fetchPosts();
   }
 
-  handleChange = (id: number) => {
-    this.props.selectPost(id);
+  handleChange = (pageNumber: number) => {
+    this.props.changePage(pageNumber);
   };
 
   render() {
@@ -22,6 +22,7 @@ class Posts extends React.Component<any, any> {
       return <Spin />;
     }
 
+    console.log(this.props.totalPosts);
     return (
       <List>
         {this.props.posts.map((post: any) => {
@@ -32,9 +33,10 @@ class Posts extends React.Component<any, any> {
             </List.Item>
           );
         })}
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <Button onClick={() => this.props.loadMore()}>Load more </Button>
-        </div>
+        <Pagination
+          total={this.props.totalPosts}
+          onChange={this.handleChange}
+        />
       </List>
     );
   }
@@ -43,14 +45,15 @@ class Posts extends React.Component<any, any> {
 const mapDispatchToProps = dispatch => {
   return {
     fetchPosts: () => dispatch(fetchPosts()),
-    loadMore: () => dispatch({ type: "MORE_LOADED" })
+    changePage: page => dispatch({ type: PAGE_CHANGED, payload: page })
   };
 };
 
 const mapStateToProps = state => {
-  const { posts, loading } = state;
+  const { totalPosts, loading } = state;
   return {
-    loading: state.loading,
+    loading,
+    totalPosts,
     posts: getVisiblePosts(state)
   };
 };

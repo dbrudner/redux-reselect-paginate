@@ -4,11 +4,12 @@ export const FETCHED_POSTS = "FETCHED_POSTS";
 export const IS_LOADING = "IS_LOADING";
 export const SELECTED_POST = "SELECTED_POST";
 export const MORE_LOADED = "MORE_LOADED";
+export const PAGE_CHANGED = "PAGE_CHANGED";
 
 const initialState = {
   loading: null,
   posts: [],
-  displayPosts: 10
+  page: 1
 };
 
 type stateType = {
@@ -26,22 +27,31 @@ export const reducer = (
   }
 
   if (action.type === FETCHED_POSTS) {
-    return { ...state, posts: action.payload, loading: false };
+    return {
+      ...state,
+      posts: action.payload,
+      loading: false,
+      totalPosts: action.payload.length
+    };
   }
 
   if (action.type === MORE_LOADED) {
-    return { ...state, displayPosts: state.displayPosts + 10 };
+    return { ...state, displayPosts: state.displayPosts + 5 };
+  }
+
+  if (action.type === PAGE_CHANGED) {
+    return { ...state, page: action.payload };
   }
 
   return state;
 };
 
 const getPosts = (state: stateType) => state.posts;
-const getDisplayPosts = (state: stateType) => state.displayPosts;
+const getPage = (state: stateType) => state.page;
 
 export const getVisiblePosts = createSelector(
-  [getDisplayPosts, getPosts],
-  (displayPosts, posts) => {
-    return posts.slice(0, displayPosts);
+  [getPage, getPosts],
+  (page, posts) => {
+    return posts.slice(5 * (page - 1), 5 * page);
   }
 );
